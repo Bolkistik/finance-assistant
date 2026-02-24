@@ -1,8 +1,11 @@
+#Этот файл необходим для запуска многоконтейнерых приложений.
+#Именно он запускает БД, фронт и бэк. Без него все нужно делать вручную.
+
 version: '3.8'
 
-services:
+services: #Список контейнеров для запуска
   db:
-    image: postgress:15
+    image: postgres:15
     container_name: finance_db
     restart: always
     environment:
@@ -10,12 +13,24 @@ services:
       POSTGRES_PASSWORD: finance_password
       POSTGRES_DB: finance_db
     volumes:
-      -postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data #Контейнеры эфемерны. При удалении все пропадает, а эта папка хранит!
     ports:
-      -"5432:5432"
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U finance_user"]
-      interval: 10s
-    
-  volumes:
-  postgres_data:
+      interval: 10s #Проверка работоспособности БД каждые 10сек
+  backend:
+    build: ./backend
+    container_name: finance_backend
+    restart: always
+    depends_on: #Ожидаем условие
+      db:
+        condition: service_healthy #Как только БД ответит запускаем контейнер
+    environment:
+      DATABASE_URL: postgresql://finance_user:finance_password@db:5432/finance_db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app #Перезагрузка при изменении кода.
+  volumes: #Здесь мы говорим докеру, что postgres_data должен быть создан
+  postgres_data: # это отдельное хранилище данных, на случай если контейнер будет перезаписан
