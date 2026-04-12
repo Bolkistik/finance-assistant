@@ -4,6 +4,7 @@ __pycache__/
 .env
 venv/
 .venv/
+db_password.txt
 
 # Node
 node_modules/

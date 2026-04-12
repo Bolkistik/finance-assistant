@@ -1,3 +1,0 @@
-DB_PASSWORD=${DB_PASS}
-DATABASE_URL=postgresql://finance_user:${DB_PASS}@db:5432/finance_db
-REACT_APP_API_URL=https://fass.gotoknow.ru
