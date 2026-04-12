@@ -32,5 +32,26 @@ services: #Список контейнеров для запуска
       - "8000:8000"
     volumes:
       - ./backend:/app #Перезагрузка при изменении кода.
+
+  frontend:
+    build: ./frontend
+    container_name: finance_frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+  nginx:
+    image: nginx:alpine
+    container_name: finance_nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+
 volumes: #Здесь мы говорим докеру, что postgres_data должен быть создан
   postgres_data: # это отдельное хранилище данных, на случай если контейнер будет перезаписан
