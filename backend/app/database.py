@@ -22,6 +22,7 @@ else:
 #Создание фабрики сессий. autocommit - авто-сохранение изменений, autoflush - авто-отправказапросов БД, bind - привязываем к нашему движку.
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+Base = declarative_base()
 #Функция для получения сессии БД (будем использовать в API)
 def get_db():
     db = SessionLocal() # создаем новую сессию
