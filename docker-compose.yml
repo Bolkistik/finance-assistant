@@ -52,6 +52,7 @@ services: #Список контейнеров для запуска
     depends_on:
       - frontend
       - backend
+    restart: unless-stopped
 
 volumes: #Здесь мы говорим докеру, что postgres_data должен быть создан
   postgres_data: # это отдельное хранилище данных, на случай если контейнер будет перезаписан
