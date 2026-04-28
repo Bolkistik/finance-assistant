@@ -5,10 +5,10 @@ from datetime import date, datetime
 from typing import List
 
 from . import models, schemas
-from .database import engine, get_db
+from .database import engine, Base, get_db
 
 #Создаем таблицы в базе данных
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Finance Assistant API") #Создаем приложение с названием "title"
 
@@ -34,14 +34,16 @@ def health(): #Создает эндпоинт для проверки сист�
 @app.get("/api/balance/{target_date}")
 def get_balance(target_date: date, db: Session = Depends(get_db)):
     # Получение накопленного баланса на указанную дату
-    accumulated = db.query(models.AccumulatedDaily).filter(
-        models.AccumulatedDaily.date == target_date
-    ).first()
+    #accumulated = db.query(models.AccumulatedDaily).filter(
+    #    models.AccumulatedDaily.date == target_date
+    #).first()
 
-    if accumulated:
-        return {"date": target_date, "balance": accumulated.end_of_day_balance}
+    #if accumulated:
+    #    return {"date": target_date, "balance": accumulated.end_of_day_balance}
     
     # Если записи нет, считаем баланс вручную
+    #from sqlalchemy import func
+
     from sqlalchemy import func
 
     total = db.query(func.sum(models.Transaction.amount)).filter(
@@ -88,14 +90,14 @@ def init_default_categories(db: Session = Depends(get_db)):
     #Инициализация базовых категорий
     default_categories = [
         {"name": "Зарплата", "type": "income", "is_accumulative": False, "color": "#4caf50"},
-        {"name": "Продукты", "type": "expence", "is_accumulative": True, "color": "#ff9800"},
-        {"name": "Авто", "type": "expence", "is_accumulative": True, "color": "#2196f3"},
-        {"name": "Прочее", "type": "expence", "is_accumulative": True, "color": "#9c27b0"},
-        {"name": "Рестораны", "type": "expence", "is_accumulative": False, "color": "#f44336"},
+        {"name": "Продукты", "type": "expense", "is_accumulative": True, "color": "#ff9800"},
+        {"name": "Авто", "type": "expense", "is_accumulative": True, "color": "#2196f3"},
+        {"name": "Прочее", "type": "expense", "is_accumulative": True, "color": "#9c27b0"},
+        {"name": "Рестораны", "type": "expense", "is_accumulative": False, "color": "#f44336"},
     ]
 
     for cat_data in default_categories:
-        exiting = db.query(models.category).filter_by(name=cat_data["name"]).first()
+        exiting = db.query(models.Category).filter_by(name=cat_data["name"]).first()
         if not exiting:
             category = models.Category(**cat_data)
             db.add(category)
