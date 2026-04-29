@@ -24,6 +24,11 @@ export const addTransaction = (data) => {
     return api.post('/api/transactions', data);
 }; //метод POST для создания новго ресурса. Вторым параметром передадим данные(тело запроса)
 
+//Получение категорий
+export const getCategories = () => {
+    return api.get('/api/categories');
+};
+
 export default api; //экспортируем на случай нестандартных запросов
 
 //Структура запроса: React Component → api.js → axios → HTTP request → FastAPI → Database   
