@@ -21,6 +21,30 @@ app.add_middleware(
     allow_headers=["*"], # Разрешаем все заголовки
 )
 
+#Автоинициализация БД
+def init_db():
+    #Создает базовые категории если их нет.
+    db = next(get_db())
+    try:
+        existing = db.query(models.Category).first()
+        if not existing:
+            default_categories = [
+                {"name": "Зарплата", "type": "income", "is_accumulative": False, "color": "#4caf50"},
+                {"name": "Продукты", "type": "expense", "is_accumulative": True, "color": "#ff9800"},
+                {"name": "Авто", "type": "expense", "is_accumulative": True, "color": "#2196f3"},
+                {"name": "Прочее", "type": "expense", "is_accumulative": True, "color": "#9c27b0"},
+                {"name": "Рестораны", "type": "expense", "is_accumulative": True, "color": "#f44336"},
+            ]
+            for cat_data in default_categories:
+                category = models.Category(**cat_data)
+                db.add(category)
+            db.commit()
+            print("Категории инициализированы!")
+    finally:
+        db.close()
+
+init_db()
+
 @app.get("/") #Декоратор @app говорит, что функция root вызывается при GET запросе
 def root():
     return {"message": "Finance Assistant API работает!"} #Возвращает словарь {message}
@@ -73,7 +97,7 @@ def create_transaction(
     db: Session = Depends(get_db)
 ):
     #Создание новой транзакции
-    db_transaction = models.Transaction(**transaction.dict())
+    db_transaction = models.Transaction(**transaction.model_dump())
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)
@@ -97,8 +121,8 @@ def init_default_categories(db: Session = Depends(get_db)):
     ]
 
     for cat_data in default_categories:
-        exiting = db.query(models.Category).filter_by(name=cat_data["name"]).first()
-        if not exiting:
+        existing = db.query(models.Category).filter_by(name=cat_data["name"]).first()
+        if not existing:
             category = models.Category(**cat_data)
             db.add(category)
 
