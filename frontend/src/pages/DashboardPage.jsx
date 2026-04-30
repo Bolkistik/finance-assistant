@@ -50,6 +50,12 @@ function DashboardPage() {
 
     const handleAddTransaction = async (e) => {
         e.preventDefault();
+
+        if (!form.category_id) {
+            alert('Выбери категорию!');
+            return;
+        }
+        
         try {
             await addTransaction({
                 date: form.date,
