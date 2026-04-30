@@ -85,7 +85,10 @@ def get_transactions(
     db: Session = Depends(get_db)
 ):
     #ПОлучение транзакций за период
-    transactions = db.query(models.Transaction).filter(
+    from sqlalchemy.orm import joinedload
+    transactions = db.query(models.Transaction)\
+        .options(joinedload(models.Transaction.category_ref))\
+        .filter(
         models.Transaction.date >= start_date,
         models.Transaction.date <= end_date
     ).order_by(models.Transaction.date.desc()).all()
@@ -101,6 +104,7 @@ def create_transaction(
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)
+    db.refresh(db_transaction, attribute_names=['category_ref'])
     return db_transaction
 
 @app.get("/api/categories")
