@@ -1,7 +1,7 @@
 //Этот файл необходим для  мостика между REACT-фронтендом и FastAPI - бэкендом 
 import axios from 'axios'; //axios это библиотека для отправки запросов на сервер
 //определяем адрес бэкенда, либо переменная окружения, либо адрес разработки
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_URL = process.env.REACT_APP_API_URL || '';
 
 const api = axios.create({//создаем axios 
     baseURL: API_URL,//все запросы будут начинаться с этого адреса
