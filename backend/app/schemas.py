@@ -38,3 +38,5 @@ class Category(CategoryBase):
 class BalanceResponse(BaseModel):
     date: date
     balance: float
+    income: float = 0.0
+    expense: float = 0.0

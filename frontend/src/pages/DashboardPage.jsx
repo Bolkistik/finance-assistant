@@ -37,7 +37,7 @@ function DashboardPage() {
                 getCategories()// загружаем категории
             ]);
 //Обновляем состояние полученными данными
-            setBalance(balanceRes.data.balance);
+            setBalance(balanceRes.data);
             setTransactions(transactionsRes.data || []);
             setCategories(categoriesRes.data || []);
 
@@ -55,11 +55,16 @@ function DashboardPage() {
             alert('Выбери категорию!');
             return;
         }
+
+        const selectedCategory = categories.find(c => c.id === parseInt(form.category_id));
+        const finalAmount = selectedCategory?.type === 'expense'
+            ? -Math.abs(parseFloat(form.amount))
+            : parseFloat(form.amount);
         
         try {
             await addTransaction({
                 date: form.date,
-                amount: parseFloat(form.amount),
+                amount: finalAmount,
                 category_id: parseInt(form.category_id),
                 description: form.description || '',
                 transaction_type: form.transaction_type,
@@ -94,7 +99,9 @@ function DashboardPage() {
 
             <div className="balance-section">
                 <BalanceCard
-                    balance={balance}
+                    balance={balance?.balance}
+                    income={balance?.income}
+                    expense={balance?.expense}
                     date={selectedDate}
                 />
             </div>
@@ -148,7 +155,7 @@ function DashboardPage() {
                                 <option value="">Выбери категорию</option>
                                 {categories.map(c => (
                                     <option key={c.id} value={c.id}>
-                                        {c.type === 'income' ? 'coin' : 'baks'} {c.name}
+                                        {c.type === 'income' ? '💰' : '💸'} {c.name}
                                     </option>
                                 ))}
                             </select>
