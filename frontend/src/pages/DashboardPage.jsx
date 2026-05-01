@@ -6,6 +6,7 @@ import BalanceCard from '../components/Dashboard/BalanceCard';//Компонен
 import DatePicker from '../components/Dashboard/DatePicker';
 import LoadingSpinner from '../components/Dashboard/LoadingSpinner';//Компоненты для отображения различных частей интерфейса
 import {formatCurrency, formatDate} from '../utils/formatters';//Утилиты для форматирования
+import DailyLimits from '../components/Dashboard/DailyLimits';
 
 function DashboardPage() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); //Получаем дату
@@ -104,6 +105,7 @@ function DashboardPage() {
                     expense={balance?.expense}
                     date={selectedDate}
                 />
+                <DailyLimits transactions={transactions} categories={categories}/>
             </div>
 
             {/*Кнопка добавления транзакции*/}
@@ -155,7 +157,7 @@ function DashboardPage() {
                                 <option value="">Выбери категорию</option>
                                 {categories.map(c => (
                                     <option key={c.id} value={c.id}>
-                                        {c.type === 'income' ? '💰' : '💸'} {c.name}
+                                        {c.type === 'income' ? '🟢' : '🔴'} {c.name}
                                     </option>
                                 ))}
                             </select>

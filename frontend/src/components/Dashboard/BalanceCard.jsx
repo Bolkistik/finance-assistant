@@ -9,8 +9,8 @@ function BalanceCard({balance, date, income, expense}) {
             </p>
             
             <div style={{ display: 'flex', gap: 20, marginTop: 10}}>
-                <span style={{ color: '#2e7d32'}}>inc Доходы: {income?.toLocaleString() || 0}₽</span>
-                <span style={{ color: '#c62828'}}>exp Расходы: {expense?.toLocaleString() || 0}₽</span>
+                <span style={{ color: '#2e7d32'}}>📈 Доходы: {income?.toLocaleString() || 0}₽</span>
+                <span style={{ color: '#c62828'}}>📉 Расходы: {expense?.toLocaleString() || 0}₽</span>
             </div>
         </div>
 
