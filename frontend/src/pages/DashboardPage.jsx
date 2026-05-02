@@ -7,6 +7,7 @@ import DatePicker from '../components/Dashboard/DatePicker';
 import LoadingSpinner from '../components/Dashboard/LoadingSpinner';//Компоненты для отображения различных частей интерфейса
 import {formatCurrency, formatDate} from '../utils/formatters';//Утилиты для форматирования
 import DailyLimits from '../components/Dashboard/DailyLimits';
+import WeeklyChart from '../components/Dashboard/WeeklyChart';
 
 function DashboardPage() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); //Получаем дату
@@ -106,6 +107,7 @@ function DashboardPage() {
                     date={selectedDate}
                 />
                 <DailyLimits transactions={transactions} categories={categories}/>
+                <WeeklyChart selectedDate={selectedDate} />
             </div>
 
             {/*Кнопка добавления транзакции*/}
