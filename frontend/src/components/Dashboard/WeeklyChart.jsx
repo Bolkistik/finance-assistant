@@ -64,4 +64,5 @@ function WeeklyChart({ selectedDate }) {
     );
 }
 
+
 export default WeeklyChart;
