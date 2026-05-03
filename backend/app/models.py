@@ -44,8 +44,10 @@ class Transaction(Base): #Класс Transaction наследуется от Bas
     transaction_type = Column(Enum(TransactionType), nullable=False, default=TransactionType.ACTUAL)
     is_manual = Column(Boolean, default=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
-
+    user_id = Column(Integer, ForeignKey("users.id"), nullable = True)
+    
     category_ref = relationship("Category", back_populates="transactions")
+    user_ref = relationship("User", back_populates="transactions")
 
     __table_args__ = (
         Index('ix_transactions_date_type', 'date', 'transaction_type'),
@@ -126,3 +128,13 @@ class AccumulatedDaily(Base):
     __table_args__ = (
         Index('ix_accumulated_daily_date', 'date'),
     )
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, nullable=False, index=True)
+    hashed_password = Column(String, nullable = False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    transactions = relationship("Transaction", back_populates="user_ref")

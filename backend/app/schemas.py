@@ -40,3 +40,11 @@ class BalanceResponse(BaseModel):
     balance: float
     income: float = 0.0
     expense: float = 0.0
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

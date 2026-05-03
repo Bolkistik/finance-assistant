@@ -5,3 +5,6 @@ sqlalchemy==2.0.35 #ORM Позволяет работать с БД PostgreSQL. 
 psycopg2-binary==2.9.11 #Адаптер для подключения python к БД. Помогает alchemy разговаривать с БД на одном языке.
 python-dotenv==1.0.1 #Библиотека для загрузки переменных окружения из файла .env 
 alembic==1.13.3 #Это у нас для миграций, чтобы не поднимать каждый раз БД
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart=0.0.6
