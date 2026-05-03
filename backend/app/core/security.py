@@ -6,7 +6,6 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from ..database import get_db
 from .. import models
-from .routers import auth
 
 SECRET_KEY = "your-secret-key-change-in-production"
 ALGORITHM = "HS256"
