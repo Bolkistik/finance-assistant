@@ -26,16 +26,16 @@ app.include_router(auth.router)
 
 
 #Создаем таблицы в базе данных
-def run_migrations():
-    try:
-        alembic_cfg = Config("/app/alembic.ini")
-        command.upgrade(alembic_cfg, "head")
-        print("Миграции применены автоматически")
-    except Exception as e:
-        print(f"Ошибка миграции (будет использована create_all): {e}")
-        Base.metadata.create_all(bind=engine)
-run_migrations()
-
+#def run_migrations():
+#    try:
+#        alembic_cfg = Config("/app/alembic.ini")
+#        command.upgrade(alembic_cfg, "head")
+#        print("Миграции применены автоматически")
+#    except Exception as e:
+#        print(f"Ошибка миграции (будет использована create_all): {e}")
+#        Base.metadata.create_all(bind=engine)
+#run_migrations()
+Base.metadata.create_all(bind=engine)
 
 #Автоинициализация БД
 def init_db():
