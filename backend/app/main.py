@@ -8,9 +8,6 @@ from . import models, schemas
 from .database import engine, Base, get_db
 from .routers import auth
 
-
-app.include_router(auth.router)
-
 #Создаем таблицы в базе данных
 Base.metadata.create_all(bind=engine)
 
@@ -24,6 +21,8 @@ app.add_middleware(
     allow_methods=["*"], # Разрешаем все HTTP методы
     allow_headers=["*"], # Разрешаем все заголовки
 )
+
+app.include_router(auth.router)
 
 #Автоинициализация БД
 def init_db():
