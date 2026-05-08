@@ -7,6 +7,7 @@ from typing import List
 from . import models, schemas
 from .database import engine, Base, get_db
 from .routers import auth
+from .core.security import get_current_user
 
 from alembic.config import Config
 from alembic import command
@@ -79,14 +80,16 @@ def get_balance(target_date: date, db: Session = Depends(get_db)):
     income = db.query(func.coalesce(func.sum(models.Transaction.amount), 0)).filter(
         models.Transaction.date <= target_date,
         models.Transaction.transaction_type == "actual",
-        models.Transaction.amount > 0
+        models.Transaction.amount > 0,
+        models.Transaction.user_id == current_user.id
     ).scalar() or 0
 
     #Расходы
     expense = db.query(func.coalesce(func.sum(models.Transaction.amount), 0)).filter(
         models.Transaction.date <= target_date,
         models.Transaction.transaction_type == "actual",
-        models.Transaction.amount < 0
+        models.Transaction.amount < 0,
+        models.Transaction.user_id == current_user.id
     ).scalar() or 0
 
     balance = income + expense
@@ -103,7 +106,8 @@ def get_balance(target_date: date, db: Session = Depends(get_db)):
 def get_transactions(
     start_date: date,
     end_date: date,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
 ):
     #ПОлучение транзакций за период
     from sqlalchemy.orm import joinedload
@@ -111,17 +115,19 @@ def get_transactions(
         .options(joinedload(models.Transaction.category_ref))\
         .filter(
         models.Transaction.date >= start_date,
-        models.Transaction.date <= end_date
+        models.Transaction.date <= end_date,
+        models.Transaction.user_id == current_user.id,
     ).order_by(models.Transaction.date.desc()).all()
 
     return transactions
 @app.post("/api/transactions")
 def create_transaction(
     transaction: schemas.TransactionCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
 ):
     #Создание новой транзакции
-    db_transaction = models.Transaction(**transaction.model_dump())
+    db_transaction = models.Transaction(**transaction.model_dump(), user_id=current_user.id)
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)

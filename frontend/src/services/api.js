@@ -9,6 +9,15 @@ const api = axios.create({//создаем axios
         'Content-Type' : 'application/json',//говорим серверу, что отправляем JSON
     },
 });
+
+api.interceptors.request.use(config => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 //получение остатка на дату
 export const getBalance = (date) => { //принимает параметр date-определенную дату
     return api.get(`/api/balance/${date}`); //Делает get запрос по адресу /api/balance/2024-01-15
