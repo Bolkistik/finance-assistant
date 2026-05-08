@@ -73,7 +73,11 @@ def health(): #Создает эндпоинт для проверки сист�
 #Минимально рабочая версия - эндпойнты
 
 @app.get("/api/balance/{target_date}")
-def get_balance(target_date: date, db: Session = Depends(get_db)):
+def get_balance(
+    target_date: date, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+    ):
     from sqlalchemy import func
 
     #Доходы
