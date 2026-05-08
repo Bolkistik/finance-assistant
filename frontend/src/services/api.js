@@ -29,6 +29,16 @@ export const getCategories = () => {
     return api.get('/api/categories');
 };
 
+export const register = (data) => {
+    return api.post('/api/auth/register', data);
+};
+
+export const login = (formData) => {
+    return api.post('/api/auth/login', formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded'}
+    });
+};
+
 export default api; //экспортируем на случай нестандартных запросов
 
 //Структура запроса: React Component → api.js → axios → HTTP request → FastAPI → Database   
