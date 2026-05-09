@@ -10,10 +10,28 @@ const api = axios.create({//создаем axios
     },
 });
 
+const token = localStorage.getItem ('token');
+if (token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp * 1000 < Date.now()) {
+            localStorage.removeItem('token');
+            console.log('Token expired');
+        }
+    } catch (e) {
+        localStorage.removeItem('token');
+    }
+}
+
 api.interceptors.request.use(config => {
-    const token = localStorage.getItem('token')?.trim().replace(/\s/g, '');
+    const token = localStorage.getItem('token');
     if (token) {
-        config.headers.Authorization = `Bearer ${token.trim()}`;
+        config.headers.Authorization = `Bearer ${token}`;
+
+        console.log('Token length:', token.length);
+        console.log('Token preview:', token.substring(0,20) + '...');
+    } else {
+        console.warn('no token found in localStorage');
     }
     return config;
 });
