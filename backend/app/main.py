@@ -139,7 +139,10 @@ def create_transaction(
     return db_transaction
 
 @app.get("/api/categories")
-def get_categories(db: Session = Depends(get_db)):
+def get_categories(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
     #Получение списка категорий
     categories = db.query(models.Category).all()
     return categories
