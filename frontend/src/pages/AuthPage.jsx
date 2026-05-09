@@ -24,7 +24,6 @@ function AuthPage({ onLogin }) {
             const token = response.data.access_token;
             localStorage.setItem('token', token);
             onLogin(token);
-            window.location.reload();
         } catch (err) {
             setError(err.response?.data?.detail || 'Ошибка. Проверьте данные');
         }

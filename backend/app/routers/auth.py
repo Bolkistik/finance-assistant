@@ -21,7 +21,7 @@ def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    token = create_access_token(data={"sub": int(user.id)})
+    token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/login", response_model=schemas.Token)
@@ -30,7 +30,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    token = create_access_token(data={"sub": int(user.id)})
+    token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": token, "token_type": "bearer"}
 
 @router.get("/me")
