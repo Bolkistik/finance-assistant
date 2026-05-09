@@ -24,7 +24,11 @@ def get_password_hash(password):
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp":expire})
+    to_encode.update({"exp": expire})
+    if "sub" in to_encode:
+        to_encode["sub"] = int(to_encode["sub"])
+
+    print(f"Creating token with payload: {to_encode}")
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
