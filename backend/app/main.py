@@ -6,7 +6,7 @@ from typing import List
 
 from . import models, schemas
 from .database import engine, Base, get_db
-from .routers import auth
+from .routers import auth, import_pdf
 from .core.security import get_current_user
 
 from alembic.config import Config
@@ -24,6 +24,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(import_pdf.router)
 
 
 #Создаем таблицы в базе данных
