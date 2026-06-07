@@ -43,11 +43,11 @@ def merge_multiline_transactions(rows: List[List[str]]) -> List[List[str]]:
                     for j in range(min(len(current), len(next_row))):
                         if next_row[j] and not current[j]:
                             current[j] = next_row[j]
-                    i += 1
+                    skip_next = True 
             merged.append(current)
-        else:
-            pass
-        i +=1
+        i += 2 if skip_next else 1
+    else:
+        i += 1
     return merged
 
 def parse_sber_pdf(file_bytes: bytes) -> List[Dict[str, Any]]:
@@ -59,31 +59,75 @@ def parse_sber_pdf(file_bytes: bytes) -> List[Dict[str, Any]]:
         for page in pdf.pages:
             tables = page.extract_tables()
 
-            for table in tables:
-                if not table:
+            if tables and len(tables) > 0 and len(tables[0]) > 0:
+                # --- существующий табличный парсер (без изменений) ---
+                for table in tables:
+                    if not table:
+                        continue
+                    for row in table:
+                        cleaned_row = [str(cell).strip() if cell else "" for cell in row]
+                        if any("ДАТА ОПЕРАЦИИ" in cell.upper() for cell in cleaned_row):
+                            continue
+                        if any("ИТОГО" in cell.upper() for cell in cleaned_row):
+                            continue
+                        if any("ОСТАТОК" in cell.upper() for cell in cleaned_row):
+                            continue
+                        if all(not cell for cell in cleaned_row):
+                            continue
+                        all_rows.append(cleaned_row)
+            else:
+                # --- НОВЫЙ ТЕКСТОВЫЙ ПАРСЕР (более надёжный) ---
+                text = page.extract_text()
+                if not text:
                     continue
-                for row in table:
-                    cleaned_row = [str(cell).strip() if cell else "" for cell in row]
-                    if any("Дата операции" in cell.upper() for cell in cleaned_row):
+                lines = text.split('\n')
+                for line in lines:
+                    line = line.strip()
+                    # Ищем дату в начале строки
+                    date_match = re.search(r'^(\d{2}\.\d{2}\.\d{4})', line)
+                    if not date_match:
                         continue
-                    if any("ИТОГО" in cell for cell in cleaned_row):
-                        continue
-                    if all(not cell for cell in cleaned_row):
-                        continue
+                    date_str = date_match.group(1)
+                    rest = line[date_match.end():].strip()
 
-                    all_rows.append(cleaned_row)
+                    # Ищем время (опционально)
+                    time_match = re.search(r'^(\d{2}:\d{2})', rest)
+                    if time_match:
+                        time_str = time_match.group(1)
+                        rest = rest[time_match.end():].strip()
+                    else:
+                        time_str = ""
 
+                    # Ищем сумму (может быть с +, пробелами, запятой)
+                    amount_match = re.search(r'([\+\d\s,]+\.?\d{2})(?=\s{4,})', rest)
+                    if not amount_match:
+                        amount_match = re.search(r'([\+\d\s,]+\.?\d{2})', rest)
+                    if not amount_match:
+                        continue
+                    amount_str = amount_match.group(1)
+                    rest = rest[:amount_match.start()] + rest[amount_match.end():]
+                    rest = rest.strip()
+
+                    # Всё, что осталось, — это категория и описание
+                    # Первое слово — категория, остальное — описание
+                    parts = rest.split(maxsplit=1)
+                    category = parts[0] if parts else ""
+                    description = parts[1] if len(parts) > 1 else ""
+
+                    all_rows.append([date_str, time_str, category, amount_str, description])
+
+        # --- объединение многострочных записей (без изменений) ---
         merged_rows = merge_multiline_transactions(all_rows)
 
         for row in merged_rows:
             if len(row) < 4:
                 continue
 
-            date_str = row[0] if len (row) > 0 else ""
+            date_str = row[0] if len(row) > 0 else ""
             if not re.match(r'\d{2}\.\d{2}\.\d{4}', date_str):
                 continue
 
-            category_or_desc = row[2] if len(row) > 2 else "" 
+            category_or_desc = row[2] if len(row) > 2 else ""
             description = row[3] if len(row) > 3 else ""
 
             amount_str = ""
@@ -91,9 +135,10 @@ def parse_sber_pdf(file_bytes: bytes) -> List[Dict[str, Any]]:
                 if col and any(c in col for c in "0123456789"):
                     amount_str = col
                     break
-            
+
             if not amount_str:
                 continue
+
             try:
                 date = clean_date(date_str)
                 amount = clean_amount(amount_str)
@@ -110,9 +155,8 @@ def parse_sber_pdf(file_bytes: bytes) -> List[Dict[str, Any]]:
                     "category_name": category_name,
                     "transaction_type": transaction_type
                 })
-
             except Exception as e:
-                print(f"Ошибка парсинга строки: {row}, ошибка: {e}") 
+                print(f"Ошибка парсинга строки: {row}, ошибка: {e}")
                 continue
 
     return transactions
